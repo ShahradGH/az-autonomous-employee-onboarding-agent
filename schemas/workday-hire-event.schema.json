@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HRMS Joiner-Mover Event",
+  "required": [
+    "employeeId",
+    "department",
+    "costCentre",
+    "requestedEntitlements"
+  ]
+}

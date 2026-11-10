@@ -1,0 +1,11 @@
+[
+  {
+    "employeeId": "EMP-8821",
+    "mode": "PeerClone",
+    "requestedRoles": [
+      "SAP_Vendor_Master_Create",
+      "SAP_Payment_Release_Approve"
+    ],
+    "expectedDecision": "VETO_SOD_TOXIC_COMBINATION"
+  }
+]

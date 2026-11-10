@@ -1,0 +1,14 @@
+{
+  "toxicPairs": [
+    {
+      "roleA": "SAP_Vendor_Master_Create",
+      "roleB": "SAP_Payment_Release_Approve",
+      "riskLevel": "CRITICAL_FRAUD_SOD"
+    },
+    {
+      "roleA": "GitHub_Org_Admin",
+      "roleB": "Prod_KeyVault_CryptoOfficer",
+      "riskLevel": "HIGH_CONTROL_BYPASS"
+    }
+  ]
+}
