@@ -1,0 +1,9 @@
+// Detect onboarding attempts targeting role-assignable groups or restricted AUs
+OnboardingGovernanceAudit_CL
+| where TimeGenerated > ago(7d)
+| summarize 
+    StandardJoinersProvisioned = countif(Action_s == "PROVISION_AU_SCOPED_STANDARD_JOINER"),
+    PrivilegedVetoes = countif(Action_s == "VETO_PRIVILEGED_GROUP_OR_ROLE_TARGET"),
+    DualSigEscalations = countif(Action_s == "HOLD_FOR_MANAGER_AND_CISO_DUAL_SIGNATURE")
+    by TargetDepartment_s, AdministrativeUnit_s
+| order by PrivilegedVetoes desc
