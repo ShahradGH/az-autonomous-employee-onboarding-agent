@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" font-family="Segoe UI, Inter, Arial, sans-serif">
+  <defs>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L10,6 L0,11 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L10,6 L0,11 Z" fill="#34d399"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L10,6 L0,11 Z" fill="#f87171"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L10,6 L0,11 Z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#0a1128"/>
+  <text x="64" y="64" fill="#f8fafc" font-size="32" font-weight="700">Autonomous Employee Onboarding Topology: Entra ID Governance &amp; AI SoD Guardrails</text>
+  <text x="64" y="98" fill="#94a3b8" font-size="18">Control Plane: PowerShell 7.4+ &amp; Microsoft Graph v1.0 | Containment: Restricted Management Administrative Units (RMAU)</text>
+
+  <!-- Zone 1: HR Source -->
+  <rect x="64" y="145" width="320" height="250" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+  <text x="88" y="185" fill="#38bdf8" font-size="20" font-weight="700">HRIS Authority Boundary</text>
+  <rect x="92" y="210" width="264" height="72" rx="8" fill="#1e293b" stroke="#64748b"/>
+  <text x="112" y="242" fill="#f8fafc" font-size="17" font-weight="600">Workday Joiner Event</text>
+  <text x="112" y="266" fill="#cbd5e1" font-size="14">employeeHireDate (T - 24h) | JobCode</text>
+  <rect x="92" y="302" width="264" height="68" rx="8" fill="#1e293b" stroke="#64748b"/>
+  <text x="112" y="332" fill="#f8fafc" font-size="16" font-weight="600">Inbound Provisioning</text>
+  <text x="112" y="354" fill="#cbd5e1" font-size="13">SCIM 2.0 -&gt; Entra ID User Object</text>
+
+  <!-- Zone 2: Entra ID Governance -->
+  <rect x="470" y="145" width="460" height="390" rx="14" fill="#0f172a" stroke="#818cf8" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="494" y="185" fill="#a5b4fc" font-size="20" font-weight="700">Microsoft Entra ID Governance</text>
+
+  <rect x="500" y="212" width="400" height="92" rx="8" fill="#1e293b" stroke="#818cf8"/>
+  <text x="520" y="244" fill="#f8fafc" font-size="18" font-weight="600">Lifecycle Workflow (Joiner)</text>
+  <text x="520" y="268" fill="#cbd5e1" font-size="14">POST /identityGovernance/lifecycleWorkflows/workflows</text>
+  <text x="520" y="290" fill="#fbbf24" font-size="13">continueOnError = false (Fail-Closed Gate)</text>
+
+  <rect x="500" y="328" width="400" height="84" rx="8" fill="#1e293b" stroke="#38bdf8"/>
+  <text x="520" y="360" fill="#f8fafc" font-size="17" font-weight="600">Custom Task Extension</text>
+  <text x="520" y="384" fill="#cbd5e1" font-size="14">OAuth2 Token Auth | Timeout 10,000 ms | 2 Retries</text>
+
+  <rect x="500" y="432" width="400" height="80" rx="8" fill="#1e293b" stroke="#34d399"/>
+  <text x="520" y="464" fill="#f8fafc" font-size="17" font-weight="600">Entitlement Management</text>
+  <text x="520" y="488" fill="#cbd5e1" font-size="14">POST /entitlementManagement/assignmentRequests</text>
+
+  <!-- Zone 3: AI & Policy Enclave -->
+  <rect x="1020" y="145" width="836" height="450" rx="14" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+  <text x="1048" y="185" fill="#fbbf24" font-size="20" font-weight="700">AI SoD &amp; Epistemic Evaluation Enclave (Private VNet 198.51.100.0/24)</text>
+
+  <rect x="1050" y="215" width="370" height="145" rx="8" fill="#1e293b" stroke="#f87171" stroke-width="2"/>
+  <text x="1070" y="246" fill="#f87171" font-size="17" font-weight="700">Gate 1: Deterministic Hard Veto</text>
+  <text x="1070" y="272" fill="#e2e8f0" font-size="14">- Blocks IsAssignableToRole = true</text>
+  <text x="1070" y="294" fill="#e2e8f0" font-size="14">- Blocks CA-Exclude / Tier0 groups</text>
+  <text x="1070" y="316" fill="#e2e8f0" font-size="14">- Dual-signature on B2B Guest / FIDO2</text>
+  <text x="1070" y="340" fill="#94a3b8" font-size="13">src/Invoke-ScopedJoinerProvisioning.ps1</text>
+
+  <rect x="1456" y="215" width="370" height="145" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="1476" y="246" fill="#38bdf8" font-size="17" font-weight="700">Gate 2: AI SoD &amp; Peer Advisor</text>
+  <text x="1476" y="272" fill="#e2e8f0" font-size="14">- Toxic SoD pair graph check</text>
+  <text x="1476" y="294" fill="#e2e8f0" font-size="14">- Peer-baseline AnomalyScore (&gt;= 0.65)</text>
+  <text x="1476" y="316" fill="#e2e8f0" font-size="14">- Abstention Gate (Confidence &lt; 0.75)</text>
+  <text x="1476" y="340" fill="#94a3b8" font-size="13">ai/Test-EntitlementSoDWithAgent.ps1</text>
+
+  <rect x="1050" y="392" width="370" height="175" rx="8" fill="#1e293b" stroke="#a78bfa"/>
+  <text x="1070" y="424" fill="#c4b5fd" font-size="17" font-weight="700">Azure AI Foundry Endpoint</text>
+  <text x="1070" y="450" fill="#e2e8f0" font-size="14">Structured JSON Critique (temp = 0.0)</text>
+  <text x="1070" y="474" fill="#e2e8f0" font-size="14">Prompt-injection boundary: candidate</text>
+  <text x="1070" y="496" fill="#e2e8f0" font-size="14">fields isolated as untrusted data</text>
+  <text x="1070" y="530" fill="#34d399" font-size="13">Local deterministic fallback if degraded</text>
+
+  <rect x="1456" y="392" width="370" height="175" rx="8" fill="#1e293b" stroke="#64748b"/>
+  <text x="1476" y="424" fill="#f8fafc" font-size="17" font-weight="700">Policy &amp; Baseline Store</text>
+  <text x="1476" y="452" fill="#cbd5e1" font-size="14">ai/entitlement-peer-baseline.json</text>
+  <text x="1476" y="476" fill="#cbd5e1" font-size="14">policies/sod-toxic-combinations.json</text>
+  <text x="1476" y="504" fill="#94a3b8" font-size="13">Contoso jobCodes: FIN-AP, ENG-SRE,</text>
+  <text x="1476" y="524" fill="#94a3b8" font-size="13">SEC-IAM-OPS, PROC-VENDOR-MGR</text>
+
+  <!-- Zone 4: Containment & Telemetry (Bottom) -->
+  <rect x="64" y="640" width="866" height="360" rx="14" fill="#0f172a" stroke="#34d399" stroke-width="2"/>
+  <text x="92" y="680" fill="#34d399" font-size="20" font-weight="700">Restricted Management Administrative Units (Blast-Radius Containment)</text>
+
+  <rect x="96" y="712" width="380" height="125" rx="8" fill="#1e293b" stroke="#34d399"/>
+  <text x="116" y="744" fill="#f8fafc" font-size="17" font-weight="600">AU-EMEA-Finance-Restricted</text>
+  <text x="116" y="770" fill="#cbd5e1" font-size="14">isMemberManagementRestricted = true</text>
+  <text x="116" y="794" fill="#94a3b8" font-size="13">Blocks tenant-wide Helpdesk mutation</text>
+
+  <rect x="512" y="712" width="386" height="125" rx="8" fill="#1e293b" stroke="#34d399"/>
+  <text x="532" y="744" fill="#f8fafc" font-size="17" font-weight="600">AU-Platform-Engineering-NonProd</text>
+  <text x="532" y="770" fill="#cbd5e1" font-size="14">Scoped Access Packages Only</text>
+  <text x="532" y="794" fill="#94a3b8" font-size="13">Zero Tier-0 or Prod KeyVault paths</text>
+
+  <rect x="96" y="860" width="802" height="108" rx="8" fill="#172554" stroke="#38bdf8"/>
+  <text x="118" y="894" fill="#38bdf8" font-size="17" font-weight="700">Denied / Abstained Paths -&gt; Human IAM Review Queue</text>
+  <text x="118" y="922" fill="#e2e8f0" font-size="14">VETO_SOD_TOXIC_COMBINATION | HOLD_PEER_ANOMALY | ABSTAIN_LOW_CONFIDENCE (&lt; 0.75)</text>
+  <text x="118" y="946" fill="#94a3b8" font-size="13">Zero entitlements mutated; full JSON decision payload emitted to AuditLogs</text>
+
+  <!-- Zone 5: Observability -->
+  <rect x="1020" y="640" width="836" height="360" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+  <text x="1048" y="680" fill="#38bdf8" font-size="20" font-weight="700">Observability, KQL Audit &amp; Compliance Evidence</text>
+  <rect x="1050" y="715" width="776" height="125" rx="8" fill="#1e293b" stroke="#64748b"/>
+  <text x="1072" y="748" fill="#f8fafc" font-size="17" font-weight="600">Azure Monitor Log Analytics (queries/Entitlement-SoD-Audit.kql)</text>
+  <text x="1072" y="776" fill="#cbd5e1" font-size="14">Correlates Entra AuditLogs + Custom Task Extension JSON decisions by EmployeeId</text>
+  <text x="1072" y="802" fill="#94a3b8" font-size="13">Retention: 365 days immutable WORM storage for SOX / ISO 27001 A.9 / NIST AC-5</text>
+
+  <rect x="1050" y="864" width="776" height="104" rx="8" fill="#1e293b" stroke="#64748b"/>
+  <text x="1072" y="898" fill="#f8fafc" font-size="17" font-weight="600">Pester 6.x Continuous Verification Matrix</text>
+  <text x="1072" y="926" fill="#cbd5e1" font-size="14">13 automated contracts validating Toxic SoD, Peer Anomalies, Abstention, and Graph v1.0 payloads</text>
+
+  <!-- Connectors -->
+  <line x1="384" y1="258" x2="496" y2="258" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <text x="394" y="244" fill="#38bdf8" font-size="13">HTTPS/SCIM</text>
+
+  <line x1="700" y1="304" x2="700" y2="324" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="900" y1="370" x2="1046" y2="290" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowAmber)"/>
+  <text x="920" y="316" fill="#fbbf24" font-size="13">Webhook (~120ms)</text>
+
+  <line x1="1420" y1="288" x2="1452" y2="288" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <line x1="1640" y1="360" x2="1640" y2="388" stroke="#64748b" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <line x1="1456" y1="470" x2="1424" y2="470" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <line x1="1050" y1="510" x2="904" y2="472" stroke="#34d399" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <text x="912" y="514" fill="#34d399" font-size="13">APPROVE_AU_SCOPED</text>
+
+  <line x1="700" y1="512" x2="700" y2="708" stroke="#34d399" stroke-width="3" marker-end="url(#arrowGreen)"/>
+  <text x="712" y="615" fill="#34d399" font-size="13">Graph v1.0 Assignment</text>
+
+  <line x1="1235" y1="567" x2="1235" y2="710" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowBlue)"/>
+  <line x1="1235" y1="567" x2="750" y2="858" stroke="#f87171" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowRed)"/>
+</svg>

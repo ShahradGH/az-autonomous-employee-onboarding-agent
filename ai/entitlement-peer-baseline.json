@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "2026.11.1",
+  "organisation": "Contoso Sovereign Financial Services (Synthetic)",
+  "abstentionConfidenceThreshold": 0.75,
+  "peerAnomalyVetoThreshold": 0.65,
+  "jobCodeBaselines": {
+    "FIN-AP-ANALYST": {
+      "department": "Finance-AccountsPayable",
+      "administrativeUnit": "AU-EMEA-Finance-Restricted",
+      "peerSampleSize": 42,
+      "standardAccessPackages": [
+        "PKG-ERP-AP-ReadOnly",
+        "PKG-M365-Finance-Standard",
+        "PKG-SAP-Invoice-Viewer"
+      ],
+      "optionalPeerRoles": {
+        "SAP_Invoice_Park": 0.88,
+        "SAP_Vendor_Master_View": 0.81,
+        "PowerBI_Finance_Viewer": 0.76
+      },
+      "forbiddenEscalationPatterns": [
+        "GlobalAdmin",
+        "PrivilegedRoleAdmin",
+        "Prod_KeyVault_CryptoOfficer",
+        "SAP_Payment_Release_Approve"
+      ]
+    },
+    "ENG-PLATFORM-SRE": {
+      "department": "Platform-Engineering",
+      "administrativeUnit": "AU-Platform-Engineering-NonProd",
+      "peerSampleSize": 37,
+      "standardAccessPackages": [
+        "PKG-Azure-NonProd-Contributor",
+        "PKG-GitHub-Contoso-Developer",
+        "PKG-Observability-LogReader"
+      ],
+      "optionalPeerRoles": {
+        "GitHub_Repo_Maintainer": 0.79,
+        "Azure_AKS_ClusterUser_NonProd": 0.84,
+        "AzMonitor_Workbook_Editor": 0.72
+      },
+      "forbiddenEscalationPatterns": [
+        "GitHub_Org_Admin",
+        "Prod_KeyVault_CryptoOfficer",
+        "CA-Exclude",
+        "SAP_Payment_Release_Approve"
+      ]
+    },
+    "SEC-IAM-OPS": {
+      "department": "Identity-Security-Operations",
+      "administrativeUnit": "AU-Identity-Governance-Ops",
+      "peerSampleSize": 14,
+      "standardAccessPackages": [
+        "PKG-Entra-IdentityGovernance-Reader",
+        "PKG-Sentinel-SOC-Analyst"
+      ],
+      "optionalPeerRoles": {
+        "Entra_LifecycleWorkflows_Reader": 0.91,
+        "Sentinel_Incident_Responder": 0.86
+      },
+      "forbiddenEscalationPatterns": [
+        "GlobalAdmin",
+        "SAP_Vendor_Master_Create",
+        "CA-Exclude"
+      ]
+    },
+    "PROC-VENDOR-MGR": {
+      "department": "Procurement",
+      "administrativeUnit": "AU-EMEA-Procurement-Standard",
+      "peerSampleSize": 23,
+      "standardAccessPackages": [
+        "PKG-SAP-Vendor-Onboarding",
+        "PKG-M365-Procurement-Standard"
+      ],
+      "optionalPeerRoles": {
+        "SAP_Vendor_Master_Create": 0.85,
+        "Contract_Repository_Editor": 0.78
+      },
+      "forbiddenEscalationPatterns": [
+        "SAP_Payment_Release_Approve",
+        "Prod_KeyVault_CryptoOfficer",
+        "Tier0"
+      ]
+    }
+  }
+}

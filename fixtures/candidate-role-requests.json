@@ -1,11 +1,54 @@
 [
   {
     "employeeId": "EMP-8821",
+    "jobCode": "PROC-VENDOR-MGR",
     "mode": "PeerClone",
+    "userType": "Member",
+    "requiresHardwareFidoKey": false,
+    "targetAdministrativeUnitId": "AU-EMEA-Procurement-Standard",
     "requestedRoles": [
       "SAP_Vendor_Master_Create",
       "SAP_Payment_Release_Approve"
     ],
     "expectedDecision": "VETO_SOD_TOXIC_COMBINATION"
+  },
+  {
+    "employeeId": "EMP-9042",
+    "jobCode": "FIN-AP-ANALYST",
+    "mode": "Baseline",
+    "userType": "Member",
+    "requiresHardwareFidoKey": false,
+    "targetAdministrativeUnitId": "AU-EMEA-Finance-Restricted",
+    "requestedRoles": [
+      "SAP_Invoice_Park",
+      "SAP_Vendor_Master_View"
+    ],
+    "expectedDecision": "APPROVE_AU_SCOPED"
+  },
+  {
+    "employeeId": "EMP-9105",
+    "jobCode": "ENG-PLATFORM-SRE",
+    "mode": "PeerClone",
+    "userType": "Member",
+    "requiresHardwareFidoKey": false,
+    "targetAdministrativeUnitId": "AU-Platform-Engineering-NonProd",
+    "requestedRoles": [
+      "Azure_AKS_ClusterUser_NonProd",
+      "SAP_Invoice_Park",
+      "Workday_Payroll_Export"
+    ],
+    "expectedDecision": "HOLD_PEER_ANOMALY"
+  },
+  {
+    "employeeId": "EMP-9201",
+    "jobCode": "EXEC-UNMAPPED-ROLE",
+    "mode": "Baseline",
+    "userType": "Member",
+    "requiresHardwareFidoKey": false,
+    "targetAdministrativeUnitId": "AU-EMEA-Finance-Restricted",
+    "requestedRoles": [
+      "SAP_Invoice_Park"
+    ],
+    "expectedDecision": "ABSTAIN_LOW_CONFIDENCE"
   }
 ]

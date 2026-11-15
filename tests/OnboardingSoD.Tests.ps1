@@ -1,83 +1,197 @@
 BeforeAll {
     $script:RepoRoot = Split-Path -Parent $PSScriptRoot
-    $script:EvaluatorPath = Join-Path $script:RepoRoot 'src/Invoke-ScopedJoinerProvisioning.ps1'
+    $script:AiAdvisorPath = Join-Path $script:RepoRoot 'ai/Test-EntitlementSoDWithAgent.ps1'
+    $script:JoinerGatePath = Join-Path $script:RepoRoot 'src/Invoke-ScopedJoinerProvisioning.ps1'
+    $script:AccessPkgPath = Join-Path $script:RepoRoot 'src/Invoke-AccessPackageAssignment.ps1'
+    $script:GraphDeployPath = Join-Path $script:RepoRoot 'graph/Deploy-LifecycleWorkflowExtension.ps1'
+    $script:FixturesPath = Join-Path $script:RepoRoot 'fixtures/candidate-role-requests.json'
     $script:KqlPath = Join-Path $script:RepoRoot 'queries/Entitlement-SoD-Audit.kql'
+    $script:Candidates = Get-Content -Path $script:FixturesPath -Raw | ConvertFrom-Json
 }
 
-Describe 'Autonomous Employee Onboarding: Cross-System Orchestration via Microsoft Graph v2.x - 16-Test Verification Matrix' {
-    Context 'Positive Path: Structural & Domain Contract Verification (8 Tests)' {
-        It 'P-01: Primary PowerShell evaluator (src/Invoke-ScopedJoinerProvisioning.ps1) exists and is non-empty' {
-            Test-Path $script:EvaluatorPath | Should -BeTrue
-            (Get-Item $script:EvaluatorPath).Length | Should -BeGreaterThan 120
-        }
-        It 'P-02: Evaluator parses cleanly with zero PowerShell AST syntax errors' {
-            $errors = $null
-            [System.Management.Automation.Language.Parser]::ParseFile($script:EvaluatorPath, [ref]$null, [ref]$errors)
-            $errors.Count | Should -Be 0
-        }
-        It 'P-03: Enforces CmdletBinding and typed parameter block' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Match '\[CmdletBinding\(\)\]'
-            $raw | Should -Match 'param\s*\('
-        }
-        It 'P-04: Returns structured PSCustomObject decision payload for downstream audit' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Match '\[PSCustomObject\]@\{'
-        }
-        It 'P-05: KQL telemetry query (queries/Entitlement-SoD-Audit.kql) defines correlation and filtering clauses' {
-            Test-Path $script:KqlPath | Should -BeTrue
-            (Get-Content $script:KqlPath -Raw) | Should -Match 'where|summarize|project'
-        }
-        It 'P-06: Domain artefact policies/sod-toxic-combinations.json exists and is non-empty' {
-            $p = Join-Path $script:RepoRoot 'policies/sod-toxic-combinations.json'
-            Test-Path $p | Should -BeTrue
-            (Get-Item $p).Length | Should -BeGreaterThan 20
+Describe 'Autonomous Employee Onboarding Guardrails - Functional & Security Matrix' {
+    Context 'AI Entitlement SoD Advisor (ai/Test-EntitlementSoDWithAgent.ps1)' {
+        It 'Approves baseline-aligned joiner (EMP-9042) within Restricted AU' {
+            $c = $script:Candidates | Where-Object { $_.employeeId -eq 'EMP-9042' }
+            $req = [PSCustomObject]@{
+                EmployeeId                 = $c.employeeId
+                JobCode                    = $c.jobCode
+                TargetAdministrativeUnitId = $c.targetAdministrativeUnitId
+                RequestedRoles             = $c.requestedRoles
+            }
+            $res = & $script:AiAdvisorPath -JoinerRequest $req
+            $res.Decision | Should -Be 'APPROVE_AU_SCOPED'
+            $res.Permitted | Should -BeTrue
+            $res.Confidence | Should -BeGreaterOrEqual 0.75
+            $res.RecommendedAccessPackages.Count | Should -BeGreaterThan 0
         }
 
-        It 'P-07: Domain artefact schemas/workday-hire-event.schema.json exists and is non-empty' {
-            $p = Join-Path $script:RepoRoot 'schemas/workday-hire-event.schema.json'
-            Test-Path $p | Should -BeTrue
-            (Get-Item $p).Length | Should -BeGreaterThan 20
+        It 'Vetoes toxic Segregation of Duties role pair (EMP-8821)' {
+            $c = $script:Candidates | Where-Object { $_.employeeId -eq 'EMP-8821' }
+            $req = [PSCustomObject]@{
+                EmployeeId                 = $c.employeeId
+                JobCode                    = $c.jobCode
+                TargetAdministrativeUnitId = $c.targetAdministrativeUnitId
+                RequestedRoles             = $c.requestedRoles
+            }
+            $res = & $script:AiAdvisorPath -JoinerRequest $req
+            $res.Decision | Should -Be 'VETO_SOD_TOXIC_COMBINATION'
+            $res.Permitted | Should -BeFalse
+            $res.ToxicPairsDetected.Count | Should -BeGreaterThan 0
         }
 
-        It 'P-08: Domain artefact fixtures/candidate-role-requests.json exists and is non-empty' {
-            $p = Join-Path $script:RepoRoot 'fixtures/candidate-role-requests.json'
-            Test-Path $p | Should -BeTrue
-            (Get-Item $p).Length | Should -BeGreaterThan 20
+        It 'Holds peer-baseline outlier roles (EMP-9105)' {
+            $c = $script:Candidates | Where-Object { $_.employeeId -eq 'EMP-9105' }
+            $req = [PSCustomObject]@{
+                EmployeeId                 = $c.employeeId
+                JobCode                    = $c.jobCode
+                TargetAdministrativeUnitId = $c.targetAdministrativeUnitId
+                RequestedRoles             = $c.requestedRoles
+            }
+            $res = & $script:AiAdvisorPath -JoinerRequest $req
+            $res.Decision | Should -Be 'HOLD_PEER_ANOMALY'
+            $res.Permitted | Should -BeFalse
+            $res.OutlierRoles | Should -Contain 'Workday_Payroll_Export'
+        }
+
+        It 'Abstains on unmapped job code with low confidence (EMP-9201)' {
+            $c = $script:Candidates | Where-Object { $_.employeeId -eq 'EMP-9201' }
+            $req = [PSCustomObject]@{
+                EmployeeId                 = $c.employeeId
+                JobCode                    = $c.jobCode
+                TargetAdministrativeUnitId = $c.targetAdministrativeUnitId
+                RequestedRoles             = $c.requestedRoles
+            }
+            $res = & $script:AiAdvisorPath -JoinerRequest $req
+            $res.Decision | Should -Be 'ABSTAIN_LOW_CONFIDENCE'
+            $res.Permitted | Should -BeFalse
+            $res.Confidence | Should -BeLessThan 0.75
+        }
+
+        It 'Integrates mocked Azure AI Foundry structured critique without leaking control' {
+            $c = $script:Candidates | Where-Object { $_.employeeId -eq 'EMP-9042' }
+            $req = [PSCustomObject]@{
+                EmployeeId                 = $c.employeeId
+                JobCode                    = $c.jobCode
+                TargetAdministrativeUnitId = $c.targetAdministrativeUnitId
+                RequestedRoles             = $c.requestedRoles
+            }
+            $mockFoundry = {
+                param($ep, $dep, $body)
+                return [PSCustomObject]@{
+                    riskSummary          = 'Low risk standard AP analyst profile.'
+                    confidenceAdjustment = 0.02
+                    recommendedAction    = 'APPROVE_AU_SCOPED'
+                }
+            }
+            $res = & $script:AiAdvisorPath -JoinerRequest $req -FoundryEndpoint 'https://foundry.contoso.invalid' -FoundryInvoker $mockFoundry
+            $res.FoundryAdvisory.recommendedAction | Should -Be 'APPROVE_AU_SCOPED'
+            $res.Confidence | Should -BeGreaterThan 0.94
         }
     }
 
-    Context 'Negative Path: Refusal Gates & Zero-Leak Security Boundaries (8 Tests)' {
-        It 'N-01: Evaluator defines explicit refusal, hold, or veto action codes' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Match 'VETO|BLOCK|HOLD|DENY|REFUSAL|QUARANTINE|REVOKE|ALERT|\$false'
+    Context 'Hard-Veto Gate & Graph v2.x Provisioning' {
+        It 'Blocks role-assignable or CA-Exclusion groups in Invoke-ScopedJoinerProvisioning.ps1' {
+            $req = [PSCustomObject]@{
+                EmployeeId                 = 'EMP-7001'
+                UserType                   = 'Member'
+                RequiresHardwareFidoKey    = $false
+                TargetAdministrativeUnitId = 'AU-EMEA-Finance-Restricted'
+            }
+            $groups = @(
+                [PSCustomObject]@{ Id = 'grp-1'; DisplayName = 'CA-Exclude-BreakGlass'; IsAssignableToRole = $false }
+            )
+            $res = & $script:JoinerGatePath -JoinerRequest $req -RequestedGroups $groups
+            $res.Permitted | Should -BeFalse
+            $res.Action | Should -Be 'VETO_PRIVILEGED_GROUP_OR_ROLE_TARGET'
         }
-        It 'N-02: Evaluator contains zero hardcoded storage keys, passwords, or SAS tokens' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Not -Match 'AccountKey=|SharedAccessSignature=|Password='
+
+        It 'Holds B2B Guest or FIDO2 hardware requests for dual human signature' {
+            $req = [PSCustomObject]@{
+                EmployeeId                 = 'EMP-7002'
+                UserType                   = 'Guest'
+                RequiresHardwareFidoKey    = $true
+                TargetAdministrativeUnitId = 'AU-EMEA-Finance-Restricted'
+            }
+            $groups = @(
+                [PSCustomObject]@{ Id = 'grp-2'; DisplayName = 'SG-Finance-Readers'; IsAssignableToRole = $false }
+            )
+            $res = & $script:JoinerGatePath -JoinerRequest $req -RequestedGroups $groups
+            $res.Permitted | Should -BeFalse
+            $res.Action | Should -Be 'HOLD_FOR_MANAGER_AND_CISO_DUAL_SIGNATURE'
         }
-        It 'N-03: Evaluator contains zero private orchestrator domains or internal host IPs' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Not -Match '192\.142\.41\.43|mvpfoundry\.alerasoul\.net'
+
+        It 'Blocks Entitlement Management Graph submission when SoD evaluation fails' {
+            $failedSod = [PSCustomObject]@{
+                Permitted = $false
+                Decision  = 'VETO_SOD_TOXIC_COMBINATION'
+                Rationale = 'Toxic pair detected.'
+            }
+            $res = & $script:AccessPkgPath -TargetUserPrincipalName 'alex.morgan@contoso.com' -TargetUserId 'usr-100' -AccessPackageId 'PKG-ERP-AP-ReadOnly' -SodEvaluationResult $failedSod
+            $res.AssignmentState | Should -Be 'BlockedBySodGate'
         }
-        It 'N-04: KQL query contains zero internal sequence tags or private URLs' {
-            $kql = Get-Content $script:KqlPath -Raw
-            $kql | Should -Not -Match 'mvpfoundry\.alerasoul\.net|Decision Pack 0'
+
+        It 'Submits Graph v1.0 Entitlement Management request when SoD evaluation passes' {
+            $passedSod = [PSCustomObject]@{
+                Permitted = $true
+                Decision  = 'APPROVE_AU_SCOPED'
+                Rationale = 'Aligned with peer baseline.'
+            }
+            $calls = [System.Collections.Generic.List[string]]::new()
+            $mockGraph = {
+                param($method, $uri, $body)
+                $calls.Add("$method $uri")
+                return [PSCustomObject]@{ id = 'req-8881' }
+            }
+            $res = & $script:AccessPkgPath -TargetUserPrincipalName 'alex.morgan@contoso.com' -TargetUserId 'usr-100' -AccessPackageId 'PKG-ERP-AP-ReadOnly' -SodEvaluationResult $passedSod -GraphInvoker $mockGraph
+            $res.AssignmentState | Should -Be 'SubmittedToEntitlementManagement'
+            $res.RequestId | Should -Be 'req-8881'
+            $calls[0] | Should -Match 'identityGovernance/entitlementManagement/assignmentRequests'
         }
-        It 'N-05: README documentation contains zero internal sequence numbering' {
-            $readme = Get-Content (Join-Path $script:RepoRoot 'README.md') -Raw
-            $readme | Should -Not -Match 'Decision Pack 0|mvpfoundry\.alerasoul\.net'
+
+        It 'Deploys Restricted AU, Custom Task Extension, and Lifecycle Workflow via Graph v1.0' {
+            $calls = [System.Collections.Generic.List[PSCustomObject]]::new()
+            $mockGraph = {
+                param($method, $uri, $body)
+                $calls.Add([PSCustomObject]@{ Method = $method; Uri = $uri; Body = $body })
+                return [PSCustomObject]@{ id = [guid]::NewGuid().ToString() }
+            }
+            $res = & $script:GraphDeployPath `
+                -AdministrativeUnitName 'AU-EMEA-Finance-Restricted' `
+                -WorkflowDisplayName 'Contoso-Joiner-SoD-Guarded' `
+                -LogicAppCallbackUrl 'https://la-sod.contoso.invalid/api/precheck' `
+                -GraphInvoker $mockGraph
+
+            $calls.Count | Should -Be 3
+            $calls[0].Uri | Should -Be 'https://graph.microsoft.com/v1.0/directory/administrativeUnits'
+            $calls[0].Body.isMemberManagementRestricted | Should -BeTrue
+            $calls[1].Uri | Should -Be 'https://graph.microsoft.com/v1.0/identityGovernance/lifecycleWorkflows/customTaskExtensions'
+            $calls[2].Uri | Should -Be 'https://graph.microsoft.com/v1.0/identityGovernance/lifecycleWorkflows/workflows'
+            $res.WorkflowDisplayName | Should -Be 'Contoso-Joiner-SoD-Guarded'
         }
-        It 'N-06: Enforces fail-closed ErrorActionPreference or deterministic condition branches' {
-            $raw = Get-Content $script:EvaluatorPath -Raw
-            $raw | Should -Match 'ErrorActionPreference|if\s*\('
+    }
+
+    Context 'Repository Hygiene, KQL & Zero-Leak Boundaries' {
+        It 'Contains zero declarative IaC (.bicep or .tf) files' {
+            $iac = Get-ChildItem -Path $script:RepoRoot -Recurse -Include '*.bicep', '*.tf' -File
+            $iac.Count | Should -Be 0
         }
-        It 'N-07: Repository root excludes internal agent guidelines or pre-commit hook scripts' {
-            Test-Path (Join-Path $script:RepoRoot 'AGENTS.md') | Should -BeFalse
-            Test-Path (Join-Path $script:RepoRoot '.githooks') | Should -BeFalse
+
+        It 'KQL audit query contains correlation and SoD veto filters' {
+            Test-Path $script:KqlPath | Should -BeTrue
+            (Get-Content $script:KqlPath -Raw) | Should -Match 'where|summarize|project'
         }
-        It 'N-08: Open-source MIT LICENSE is present at repository root' {
-            Test-Path (Join-Path $script:RepoRoot 'LICENSE') | Should -BeTrue
+
+        It 'README and docs contain zero internal sequence numbers or private orchestrator domains' {
+            $files = @(
+                (Join-Path $script:RepoRoot 'README.md'),
+                (Join-Path $script:RepoRoot 'docs/ADR-001-sod-boundary.md'),
+                (Join-Path $script:RepoRoot 'docs/JML-GOVERNANCE-RUNBOOK.md')
+            )
+            foreach ($f in $files) {
+                $raw = Get-Content $f -Raw
+                $raw | Should -Not -Match 'mvpfoundry\.alerasoul\.net|192\.142\.41\.43|Decision Pack 0|idea-010'
+            }
         }
     }
 }
